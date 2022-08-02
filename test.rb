@@ -209,6 +209,9 @@ pp client.transact_write_items(
   ]
 )
 
+puts '----------- LIST TABLES'
+pp client.list_tables
+
 #### ERRORS
 puts '----------- UPDATE ITEM'
 pp client.update_item(

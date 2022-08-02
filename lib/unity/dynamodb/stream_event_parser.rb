@@ -26,13 +26,13 @@ module Unity
 
       def call(hash)
         EventStruct.new(
-          hash['eventID'],
-          hash['eventName'],
-          hash['eventVersion'],
-          hash['eventSource'],
-          hash['eventSourceARN'],
-          hash['awsRegion'],
-          StreamRecordStruct.new(
+          hash['eventID'], # event_id
+          hash['eventName'], # event_name
+          hash['eventVersion'], # event_version
+          hash['eventSource'], # event_source
+          hash['eventSourceARN'], # event_source_arn
+          hash['awsRegion'], # aws_region
+          StreamRecordStruct.new( # dynamodb
             hash['dynamodb']['ApproximateCreationDateTime'],
             @deserializer.call(hash['dynamodb']['Keys']),
             @deserializer.call(hash['dynamodb']['NewImage']),
@@ -41,8 +41,8 @@ module Unity
             hash['dynamodb']['SizeBytes'],
             hash['dynamodb']['StreamViewType']
           ),
-          hash['userIdentity'],
-          hash['eventSourceARN']&.split('/', 3)&.at(1)
+          hash['userIdentity'], # user_identity
+          hash['eventSourceARN']&.split('/', 3)&.at(1) # table_name
         )
       end
     end

@@ -111,6 +111,14 @@ module Unity
         )
       end
 
+      def list_tables(parameters = {})
+        execute(
+          parameters,
+          Unity::DynamoDB::Shapes::ListTablesShape,
+          Unity::DynamoDB::Outputs::ListTablesOutput
+        )
+      end
+
       private
 
       def execute(parameters, shape_klass, output_klass)
