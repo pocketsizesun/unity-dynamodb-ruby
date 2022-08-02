@@ -18,26 +18,26 @@ module Unity
         when Numeric then { 'N' => arg.to_s }
         when String then { 'S' => arg }
         when Array
-          value.map { |item| translate(item) }
+          arg.map { |item| translate(item) }
         when Set
-          case value.first
+          case arg.first
           when String
-            { 'SS' => value.map { |item| translate(item.to_s) } }
+            { 'SS' => arg.map { |item| translate(item.to_s) } }
           when StringIO
-            { 'BS' => value.map { |item| Base64.encode64(item.read) } }
+            { 'BS' => arg.map { |item| Base64.encode64(item.read) } }
           when Numeric
-            { 'NS' => value.map { |item| translate(item.to_i) } }
+            { 'NS' => arg.map { |item| translate(item.to_i) } }
           else
-            raise "unknown set type: #{value.first.class}"
+            raise "unknown set type: #{arg.first.class}"
           end
         when Hash
-          value.transform_values { |item| translate(item) }
+          { 'M' => arg.transform_values { |item| translate(item) } }
         when StringIO
           { 'B' => Base64.encode64(item.read) }
         when NilClass
           { 'NULL' => true }
         when TrueClass, FalseClass
-          { 'BOOL' => value }
+          { 'BOOL' => arg }
         else
           raise "unknown type: #{arg.class}"
         end
