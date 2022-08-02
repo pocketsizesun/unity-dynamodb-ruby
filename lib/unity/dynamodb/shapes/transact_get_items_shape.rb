@@ -4,6 +4,8 @@ module Unity
   module DynamoDB
     module Shapes
       class TransactGetItemsShape
+        API_TARGET = 'DynamoDB_20120810.TransactGetItems'
+
         def initialize(attributes)
           @transact_items = attributes[:transact_items]
           @return_consumed_capacity = attributes[:return_consumed_capacity]

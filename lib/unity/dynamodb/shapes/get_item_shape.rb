@@ -4,6 +4,8 @@ module Unity
   module DynamoDB
     module Shapes
       class GetItemShape
+        API_TARGET = 'DynamoDB_20120810.GetItem'
+
         def initialize(attributes)
           @table_name = attributes[:table_name]
           @key = attributes[:key]

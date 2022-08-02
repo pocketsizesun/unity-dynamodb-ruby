@@ -4,6 +4,8 @@ module Unity
   module DynamoDB
     module Shapes
       class TransactWriteItemsShape
+        API_TARGET = 'DynamoDB_20120810.TransactWriteItems'
+
         def initialize(attributes)
           @transact_items = attributes[:transact_items]
           @client_request_token = attributes[:client_request_token]

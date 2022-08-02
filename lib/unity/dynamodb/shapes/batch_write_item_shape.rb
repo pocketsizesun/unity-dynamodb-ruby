@@ -4,6 +4,8 @@ module Unity
   module DynamoDB
     module Shapes
       class BatchWriteItemShape
+        API_TARGET = 'DynamoDB_20120810.BatchWriteItem'
+
         def initialize(attributes)
           @request_items = attributes[:request_items]
           @return_consumed_capacity = attributes[:return_consumed_capacity]

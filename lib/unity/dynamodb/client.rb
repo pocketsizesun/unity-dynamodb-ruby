@@ -21,6 +21,10 @@ module Unity
 
         @endpoint = options.delete(:endpoint) || "https://dynamodb.#{@aws_region}.amazonaws.com"
         @endpoint_uri = URI.parse(@endpoint)
+        @retry_on_throughput_exceeded = options.delete(:retry_on_throughput_exceeded) || true
+        @max_retries_on_throughput_exceeded = options.delete(:max_retries_on_throughput_exceeded) || 3
+        @retry_interval_on_throughput_exceeded = options.delete(:retry_interval_on_throughput_exceeded) || 1
+
         # logger = Logger.new(STDOUT)
         # logger.level = Logger::DEBUG
         # @http = HTTP.use(logging: { logger: logger }).persistent(@endpoint)
@@ -28,96 +32,106 @@ module Unity
       end
 
       def query(parameters)
-        shape = Unity::DynamoDB::Shapes::QueryShape.new(parameters)
-        resp = request('DynamoDB_20120810.Query', shape)
-
-        Unity::DynamoDB::Outputs::QueryOutput.from_dynamodb_json(
-          resp.parse(:json)
+        execute(
+          parameters,
+          Unity::DynamoDB::Shapes::QueryShape,
+          Unity::DynamoDB::Outputs::QueryOutput
         )
       end
 
       def scan(parameters)
-        shape = Unity::DynamoDB::Shapes::ScanShape.new(parameters)
-        resp = request('DynamoDB_20120810.Scan', shape)
-
-        Unity::DynamoDB::Outputs::ScanOutput.from_dynamodb_json(
-          resp.parse(:json)
+        execute(
+          parameters,
+          Unity::DynamoDB::Shapes::ScanShape,
+          Unity::DynamoDB::Outputs::ScanOutput
         )
       end
 
       def batch_get_item(parameters)
-        shape = Unity::DynamoDB::Shapes::BatchGetItemShape.new(parameters)
-        resp = request('DynamoDB_20120810.BatchGetItem', shape)
-
-        Unity::DynamoDB::Outputs::BatchGetItemOutput.from_dynamodb_json(
-          resp.parse(:json)
+        execute(
+          parameters,
+          Unity::DynamoDB::Shapes::BatchGetItemShape,
+          Unity::DynamoDB::Outputs::BatchGetItemOutput
         )
       end
 
       def get_item(parameters)
-        shape = Unity::DynamoDB::Shapes::GetItemShape.new(parameters)
-        resp = request('DynamoDB_20120810.GetItem', shape)
-
-        Unity::DynamoDB::Outputs::GetItemOutput.from_dynamodb_json(
-          resp.parse(:json)
+        execute(
+          parameters,
+          Unity::DynamoDB::Shapes::GetItemShape,
+          Unity::DynamoDB::Outputs::GetItemOutput
         )
       end
 
       def batch_write_item(parameters)
-        shape = Unity::DynamoDB::Shapes::BatchWriteItemShape.new(parameters)
-        resp = request('DynamoDB_20120810.BatchWriteItem', shape)
-
-        Unity::DynamoDB::Outputs::BatchWriteItemOutput.from_dynamodb_json(
-          resp.parse(:json)
+        execute(
+          parameters,
+          Unity::DynamoDB::Shapes::BatchWriteItemShape,
+          Unity::DynamoDB::Outputs::BatchWriteItemOutput
         )
       end
 
       def put_item(parameters)
-        shape = Unity::DynamoDB::Shapes::PutItemShape.new(parameters)
-        resp = request('DynamoDB_20120810.PutItem', shape)
-
-        Unity::DynamoDB::Outputs::PutItemOutput.from_dynamodb_json(
-          resp.parse(:json)
+        execute(
+          parameters,
+          Unity::DynamoDB::Shapes::PutItemShape,
+          Unity::DynamoDB::Outputs::PutItemOutput
         )
       end
 
       def delete_item(parameters)
-        shape = Unity::DynamoDB::Shapes::DeleteItemShape.new(parameters)
-        resp = request('DynamoDB_20120810.DeleteItem', shape)
-
-        Unity::DynamoDB::Outputs::DeleteItemOutput.from_dynamodb_json(
-          resp.parse(:json)
+        execute(
+          parameters,
+          Unity::DynamoDB::Shapes::DeleteItemShape,
+          Unity::DynamoDB::Outputs::DeleteItemOutput
         )
       end
 
       def update_item(parameters)
-        shape = Unity::DynamoDB::Shapes::UpdateItemShape.new(parameters)
-        resp = request('DynamoDB_20120810.UpdateItem', shape)
-
-        Unity::DynamoDB::Outputs::UpdateItemOutput.from_dynamodb_json(
-          resp.parse(:json)
+        execute(
+          parameters,
+          Unity::DynamoDB::Shapes::UpdateItemShape,
+          Unity::DynamoDB::Outputs::UpdateItemOutput
         )
       end
 
       def transact_get_items(parameters)
-        shape = Unity::DynamoDB::Shapes::TransactGetItemsShape.new(parameters)
-        resp = request('DynamoDB_20120810.TransactGetItems', shape)
-
-        Unity::DynamoDB::Outputs::TransactGetItemsOutput.from_dynamodb_json(
-          resp.parse(:json)
+        execute(
+          parameters,
+          Unity::DynamoDB::Shapes::TransactGetItemsShape,
+          Unity::DynamoDB::Outputs::TransactGetItemsOutput
         )
       end
 
       def transact_write_items(parameters)
-        shape = Unity::DynamoDB::Shapes::TransactWriteItemsShape.new(parameters)
-        resp = request('DynamoDB_20120810.TransactWriteItems', shape)
-
-        Unity::DynamoDB::Outputs::TransactWriteItemsOutput.from_dynamodb_json(
-          resp.parse(:json)
+        execute(
+          parameters,
+          Unity::DynamoDB::Shapes::TransactWriteItemsShape,
+          Unity::DynamoDB::Outputs::TransactWriteItemsOutput
         )
       end
 
       private
+
+      def execute(parameters, shape_klass, output_klass)
+        retries_count = 0
+
+        begin
+          shape = shape_klass.new(parameters)
+          resp = request(shape_klass::API_TARGET, shape)
+
+          output_klass.from_dynamodb_json(resp.parse(:json))
+        rescue Unity::DynamoDB::Errors::ProvisionedThroughputExceededError
+          raise unless @retry_on_throughput_exceeded == true
+
+          raise if retries_count >= @max_retries_on_throughput_exceeded
+
+          retries_count += 1
+
+          sleep @retry_interval_on_throughput_exceeded
+          retry
+        end
+      end
 
       def request(amz_target, shape)
         body = shape.to_dynamodb_json

@@ -4,6 +4,8 @@ module Unity
   module DynamoDB
     module Shapes
       class ScanShape
+        API_TARGET = 'DynamoDB_20120810.Scan'
+
         def initialize(attributes)
           @table_name = attributes[:table_name]
           @index_name = attributes[:index_name]

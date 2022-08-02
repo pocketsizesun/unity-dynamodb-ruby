@@ -4,6 +4,8 @@ module Unity
   module DynamoDB
     module Shapes
       class QueryShape
+        API_TARGET = 'DynamoDB_20120810.Query'
+
         def initialize(attributes)
           @table_name = attributes[:table_name]
           @index_name = attributes[:index_name]
