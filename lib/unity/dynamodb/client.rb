@@ -3,15 +3,14 @@
 module Unity
   module DynamoDB
     class Client
+      attr_accessor :retry_on_throughput_exceeded,
+                    :max_retries_on_throughput_exceeded,
+                    :retry_interval_on_throughput_exceeded,
+                    :http_timeouts
+
       def initialize(options = {})
         @aws_region = options[:region] || ENV['AWS_REGION'] || Aws.shared_config.region
-        @aws_credentials = Aws::CredentialProviderChain.new(
-          OpenStruct.new(
-            region: @aws_region,
-            instance_profile_credentials_timeout: 1,
-            instance_profile_credentials_retries: 0
-          )
-        ).resolve
+        @aws_credentials = options.delete(:credentials) || init_credentials_provider_chain
 
         @aws_signer = Aws::Sigv4::Signer.new(
           service: 'dynamodb',
@@ -19,16 +18,24 @@ module Unity
           credentials_provider: @aws_credentials
         )
 
-        @endpoint = options.delete(:endpoint) || "https://dynamodb.#{@aws_region}.amazonaws.com"
-        @endpoint_uri = URI.parse(@endpoint)
+        endpoint = options.delete(:endpoint) || "dynamodb.#{@aws_region}.amazonaws.com"
+        @endpoint_uri = \
+          if endpoint.start_with?('http')
+            URI.parse(endpoint)
+          else
+            URI.parse("https://#{endpoint}")
+          end
+        @endpoint_url = @endpoint_uri.to_s
         @retry_on_throughput_exceeded = options.delete(:retry_on_throughput_exceeded) || true
         @max_retries_on_throughput_exceeded = options.delete(:max_retries_on_throughput_exceeded) || 3
         @retry_interval_on_throughput_exceeded = options.delete(:retry_interval_on_throughput_exceeded) || 1
+        @http_timeouts = options.delete(:http_timeouts) || { connect: 5, write: 5, read: 5 }
 
         # logger = Logger.new(STDOUT)
         # logger.level = Logger::DEBUG
-        # @http = HTTP.use(logging: { logger: logger }).persistent(@endpoint)
-        @http = HTTP.persistent(@endpoint)
+        # @http = HTTP.use(logging: { logger: logger }).timeout(@http_timeouts).persistent(@endpoint_url)
+
+        @http = HTTP.timeout(@http_timeouts).persistent(@endpoint_url)
       end
 
       def query(parameters)
@@ -144,15 +151,14 @@ module Unity
       def request(amz_target, shape)
         body = shape.to_dynamodb_json
         request_headers = {
-          'Accept-Encoding' => 'identity',
           'Content-Length' => body.bytesize,
-          'User-Agent' => 'unity-dynamodb',
           'Content-Type' => 'application/x-amz-json-1.0',
           'X-Amz-Target' => amz_target
         }
+
         signature = @aws_signer.sign_request(
           http_method: 'POST',
-          url: @endpoint,
+          url: @endpoint_url,
           headers: request_headers,
           body: body
         )
@@ -173,7 +179,7 @@ module Unity
 
         case data['__type']
         when /ResourceNotFoundException/
-          raise Unity::DynamoDB::Errors::ValidationError.new(data['message'])
+          raise Unity::DynamoDB::Errors::ResourceNotFoundError.new(data['message'])
         when /ValidationException/
           raise Unity::DynamoDB::Errors::ValidationError.new(data['message'])
         when /ConditionalCheckFailedException/
@@ -184,11 +190,23 @@ module Unity
           raise Unity::DynamoDB::Errors::RequestLimitExceededError.new(data['message'])
         when /TransactionCanceledException/
           raise Unity::DynamoDB::Errors::TransactionCanceledError.new(data['message'])
+        when /SerializationException/
+          raise Unity::DynamoDB::Errors::SerializationError.new(data['message'])
         else
           raise Unity::DynamoDB::Errors::UnknownError.new(
             data['__type'], data['message']
           )
         end
+      end
+
+      def init_credentials_provider_chain
+        Aws::CredentialProviderChain.new(
+          OpenStruct.new(
+            region: @aws_region,
+            instance_profile_credentials_timeout: 1,
+            instance_profile_credentials_retries: 1
+          )
+        ).resolve
       end
     end
   end
