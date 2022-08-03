@@ -50,6 +50,10 @@ require_relative "dynamodb/outputs/transact_get_items_output"
 require_relative "dynamodb/outputs/transact_write_items_output"
 require_relative "dynamodb/outputs/update_item_output"
 
+# utils
+require_relative "dynamodb/number_set"
+require_relative "dynamodb/string_set"
+
 module Unity
   module DynamoDB
   end

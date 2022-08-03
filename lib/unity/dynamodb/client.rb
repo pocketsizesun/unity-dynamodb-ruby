@@ -192,7 +192,10 @@ module Unity
         when /RequestLimitExceeded/
           raise Unity::DynamoDB::Errors::RequestLimitExceededError.new(data['message'])
         when /TransactionCanceledException/
-          raise Unity::DynamoDB::Errors::TransactionCanceledError.new(data['message'])
+          pp data
+          raise Unity::DynamoDB::Errors::TransactionCanceledError.new(
+            data['Message'], data['CancellationReasons']
+          )
         when /SerializationException/
           raise Unity::DynamoDB::Errors::SerializationError.new(data['message'])
         else

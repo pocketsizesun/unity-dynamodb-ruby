@@ -19,6 +19,10 @@ module Unity
         when String then { 'S' => arg }
         when Array
           arg.map { |item| translate(item) }
+        when Unity::DynamoDB::StringSet
+          { 'SS' => arg.to_a }
+        when Unity::DynamoDB::NumberSet
+          { 'NS' => arg.to_a }
         when Set
           case arg.first
           when String
