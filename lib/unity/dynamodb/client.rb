@@ -35,7 +35,10 @@ module Unity
         # logger.level = Logger::DEBUG
         # @http = HTTP.use(logging: { logger: logger }).timeout(@http_timeouts).persistent(@endpoint_url)
 
-        @http = HTTP.timeout(@http_timeouts).persistent(@endpoint_url)
+        @http = HTTP.timeout(@http_timeouts).persistent(
+          @endpoint_url,
+          timeout: options.delete(:keep_alive_timeout) || 15
+        )
       end
 
       def query(parameters)
