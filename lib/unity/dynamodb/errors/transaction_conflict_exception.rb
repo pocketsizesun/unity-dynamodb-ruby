@@ -3,7 +3,7 @@
 module Unity
   module DynamoDB
     module Errors
-      class ResourceNotFoundError < Unity::DynamoDB::Error
+      class TransactionConflictException < Unity::DynamoDB::Error
       end
     end
   end

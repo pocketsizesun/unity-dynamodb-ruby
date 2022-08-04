@@ -3,7 +3,7 @@
 module Unity
   module DynamoDB
     module Errors
-      class ProvisionedThroughputExceededError < Unity::DynamoDB::Error
+      class ValidationException < Unity::DynamoDB::Error
       end
     end
   end

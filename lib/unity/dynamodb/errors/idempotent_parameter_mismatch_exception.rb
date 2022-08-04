@@ -3,7 +3,7 @@
 module Unity
   module DynamoDB
     module Errors
-      class ConditionalCheckFailedError < Unity::DynamoDB::Error
+      class IdempotentParameterMismatchException < Unity::DynamoDB::Error
       end
     end
   end

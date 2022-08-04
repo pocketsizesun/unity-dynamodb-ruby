@@ -3,7 +3,7 @@
 module Unity
   module DynamoDB
     module Errors
-      class UnknownError < Unity::DynamoDB::Error
+      class ProvisionedThroughputExceededException < Unity::DynamoDB::Error
       end
     end
   end

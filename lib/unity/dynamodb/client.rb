@@ -182,23 +182,27 @@ module Unity
 
         case data['__type']
         when /ResourceNotFoundException/
-          raise Unity::DynamoDB::Errors::ResourceNotFoundError.new(data['message'])
+          raise Unity::DynamoDB::Errors::ResourceNotFoundException, data['message']
         when /ValidationException/
-          raise Unity::DynamoDB::Errors::ValidationError.new(data['message'])
+          raise Unity::DynamoDB::Errors::ValidationException, data['message']
         when /ConditionalCheckFailedException/
-          raise Unity::DynamoDB::Errors::ConditionalCheckFailedError.new(data['message'])
+          raise Unity::DynamoDB::Errors::ConditionalCheckFailedException, data['message']
         when /ProvisionedThroughputExceededException/
-          raise Unity::DynamoDB::Errors::ProvisionedThroughputExceededError.new(data['message'])
+          raise Unity::DynamoDB::Errors::ProvisionedThroughputExceededException, data['message']
         when /RequestLimitExceeded/
-          raise Unity::DynamoDB::Errors::RequestLimitExceededError.new(data['message'])
+          raise Unity::DynamoDB::Errors::RequestLimitExceededException, data['message']
         when /TransactionCanceledException/
-          raise Unity::DynamoDB::Errors::TransactionCanceledError.new(
+          raise Unity::DynamoDB::Errors::TransactionCanceledException.new(
             data['Message'], data['CancellationReasons']
           )
-        when /SerializationException/
-          raise Unity::DynamoDB::Errors::SerializationError.new(data['message'])
+        when /TransactionConflictException/
+          raise Unity::DynamoDB::Errors::TransactionConflictException, data['message']
+        when /TransactionInProgressException/
+          raise Unity::DynamoDB::Errors::TransactionInProgressException, data['message']
+        when /IdempotentParameterMismatchException/
+          raise Unity::DynamoDB::Errors::IdempotentParameterMismatchException, data['message']
         else
-          raise Unity::DynamoDB::Errors::UnknownError, data.inspect
+          raise Unity::DynamoDB::Errors::UnknownException, data.inspect
         end
       end
 

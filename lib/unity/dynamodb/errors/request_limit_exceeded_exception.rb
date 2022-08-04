@@ -3,7 +3,7 @@
 module Unity
   module DynamoDB
     module Errors
-      class RequestLimitExceededError < Unity::DynamoDB::Error
+      class RequestLimitExceededException < Unity::DynamoDB::Error
       end
     end
   end

@@ -3,7 +3,7 @@
 module Unity
   module DynamoDB
     module Errors
-      class SerializationError < Unity::DynamoDB::Error
+      class SerializationException < Unity::DynamoDB::Error
       end
     end
   end

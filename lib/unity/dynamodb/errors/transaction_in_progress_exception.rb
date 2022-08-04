@@ -3,7 +3,7 @@
 module Unity
   module DynamoDB
     module Errors
-      class ValidationError < Unity::DynamoDB::Error
+      class TransactionInProgressException < Unity::DynamoDB::Error
       end
     end
   end
