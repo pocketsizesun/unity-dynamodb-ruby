@@ -139,7 +139,7 @@ module Unity
           resp = request(shape_klass::API_TARGET, shape)
 
           output_klass.from_dynamodb_json(resp.parse(:json))
-        rescue Unity::DynamoDB::Errors::ProvisionedThroughputExceededError
+        rescue Unity::DynamoDB::Errors::ProvisionedThroughputExceededException
           raise unless @retry_on_throughput_exceeded == true
 
           raise if retries_count >= @max_retries_on_throughput_exceeded
