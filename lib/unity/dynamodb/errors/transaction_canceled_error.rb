@@ -10,6 +10,12 @@ module Unity
           super(message)
           @reasons = reasons
         end
+
+        def any_transaction_conflict?
+          @reasons.any? do |reason|
+            reason['Code'] == 'TransactionConflict'
+          end
+        end
       end
     end
   end
