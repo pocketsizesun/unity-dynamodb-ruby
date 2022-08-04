@@ -3,7 +3,7 @@
 module Unity
   module DynamoDB
     module Errors
-      class ProvisionedThroughputExceededException < Unity::DynamoDB::RetryableError
+      class InternalServerError < Unity::DynamoDB::RetryableError
       end
     end
   end

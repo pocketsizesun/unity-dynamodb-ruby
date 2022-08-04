@@ -3,9 +3,9 @@
 module Unity
   module DynamoDB
     class Client
-      attr_accessor :retry_on_throughput_exceeded,
-                    :max_retries_on_throughput_exceeded,
-                    :retry_interval_on_throughput_exceeded,
+      attr_accessor :retry_on_retryable_error,
+                    :max_retries_on_retryable_error,
+                    :retry_interval_on_retryable_error,
                     :http_timeouts
 
       def initialize(options = {})
@@ -26,9 +26,9 @@ module Unity
             URI.parse("https://#{endpoint}")
           end
         @endpoint_url = @endpoint_uri.to_s
-        @retry_on_throughput_exceeded = options.delete(:retry_on_throughput_exceeded) || true
-        @max_retries_on_throughput_exceeded = options.delete(:max_retries_on_throughput_exceeded) || 3
-        @retry_interval_on_throughput_exceeded = options.delete(:retry_interval_on_throughput_exceeded) || 1
+        @retry_on_retryable_error = options.delete(:retry_on_retryable_error) || true
+        @max_retries_on_retryable_error = options.delete(:max_retries_on_retryable_error) || 3
+        @retry_interval_on_retryable_error = options.delete(:retry_interval_on_retryable_error) || 1
         @http_timeouts = options.delete(:http_timeouts) || { connect: 5, write: 5, read: 5 }
 
         # logger = Logger.new(STDOUT)
@@ -139,14 +139,14 @@ module Unity
           resp = request(shape_klass::API_TARGET, shape)
 
           output_klass.from_dynamodb_json(resp.parse(:json))
-        rescue Unity::DynamoDB::Errors::ProvisionedThroughputExceededException
-          raise unless @retry_on_throughput_exceeded == true
+        rescue Unity::DynamoDB::RetryableError
+          raise unless @retry_on_retryable_error == true
 
-          raise if retries_count >= @max_retries_on_throughput_exceeded
+          raise if retries_count >= @max_retries_on_retryable_error
 
           retries_count += 1
 
-          sleep @retry_interval_on_throughput_exceeded
+          sleep @retry_interval_on_retryable_error
           retry
         end
       end
@@ -201,6 +201,8 @@ module Unity
           raise Unity::DynamoDB::Errors::TransactionInProgressException, data['message']
         when /IdempotentParameterMismatchException/
           raise Unity::DynamoDB::Errors::IdempotentParameterMismatchException, data['message']
+        when /InternalServerError/
+          raise Unity::DynamoDB::Errors::InternalServerError, data['message']
         else
           raise Unity::DynamoDB::Errors::UnknownException, data.inspect
         end

@@ -15,8 +15,10 @@ require_relative "dynamodb/attribute_deserializer"
 
 # errors
 require_relative "dynamodb/error"
+require_relative "dynamodb/retryable_error"
 require_relative "dynamodb/errors/conditional_check_failed_exception"
 require_relative "dynamodb/errors/idempotent_parameter_mismatch_exception"
+require_relative "dynamodb/errors/internal_server_error"
 require_relative "dynamodb/errors/provisioned_throughput_exceeded_exception"
 require_relative "dynamodb/errors/request_limit_exceeded_exception"
 require_relative "dynamodb/errors/resource_not_found_exception"
