@@ -198,9 +198,7 @@ module Unity
         when /SerializationException/
           raise Unity::DynamoDB::Errors::SerializationError.new(data['message'])
         else
-          raise Unity::DynamoDB::Errors::UnknownError.new(
-            data['__type'], data['message']
-          )
+          raise Unity::DynamoDB::Errors::UnknownError, data.inspect
         end
       end
 
