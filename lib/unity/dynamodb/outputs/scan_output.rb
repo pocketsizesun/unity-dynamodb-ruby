@@ -10,7 +10,7 @@ module Unity
           attribute_deserializer = Unity::DynamoDB::AttributeDeserializer.new
           new(
             count: data['Count'],
-            items: data['Items'].collect do |item|
+            items: data['Items']&.collect do |item|
               attribute_deserializer.call(item)
             end,
             scanned_count: data['ScannedCount'],
