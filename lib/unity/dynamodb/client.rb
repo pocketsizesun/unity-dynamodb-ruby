@@ -30,14 +30,9 @@ module Unity
         @max_retries_on_retryable_error = options.delete(:max_retries_on_retryable_error) || 3
         @retry_interval_on_retryable_error = options.delete(:retry_interval_on_retryable_error) || 1
         @http_timeouts = options.delete(:http_timeouts) || { connect: 5, write: 5, read: 5 }
-
-        # logger = Logger.new(STDOUT)
-        # logger.level = Logger::DEBUG
-        # @http = HTTP.use(logging: { logger: logger }).timeout(@http_timeouts).persistent(@endpoint_url)
-
         @http = HTTP.timeout(@http_timeouts).persistent(
           @endpoint_url,
-          timeout: options.delete(:keep_alive_timeout) || 15
+          timeout: options.delete(:keep_alive_timeout) || 60
         )
       end
 
