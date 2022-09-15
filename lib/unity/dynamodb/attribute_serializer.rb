@@ -18,7 +18,7 @@ module Unity
         when Numeric then { 'N' => arg.to_s }
         when String then { 'S' => arg }
         when Array
-          arg.map { |item| translate(item) }
+          { 'L' => arg.map { |item| translate(item) } }
         when Unity::DynamoDB::StringSet
           { 'SS' => arg.to_a }
         when Unity::DynamoDB::NumberSet
