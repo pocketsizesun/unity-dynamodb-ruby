@@ -3,6 +3,26 @@ require 'unity-dynamodb'
 require 'benchmark'
 
 client = Unity::DynamoDB::Client.new
+puts '----------- EXECUTE STATEMENT'
+dates = (Date.parse('2022-06-01')..Date.parse('2022-06-30')).map(&:to_s)
+placeholders = dates.map { '?' }
+
+execute_statement_params = {
+  statement: "SELECT * FROM \"test\" WHERE \"date\" IN(#{placeholders.join(', ')}) AND \"id\" >= ?",
+  limit: 1,
+  parameters: dates + [1654063200]
+}
+pp execute_statement_params
+loop do
+  result = client.execute_statement(execute_statement_params)
+  pp result.items
+  pp result.next_token
+  break if result.next_token.nil?
+
+  execute_statement_params[:next_token] = result.next_token
+end
+
+exit
 
 puts '----------- QUERY'
 pp client.query(

@@ -36,6 +36,14 @@ module Unity
         )
       end
 
+      def execute_statement(parameters)
+        execute(
+          parameters,
+          Unity::DynamoDB::Shapes::ExecuteStatementShape,
+          Unity::DynamoDB::Outputs::ExecuteStatementOutput
+        )
+      end
+
       def query(parameters)
         execute(
           parameters,
