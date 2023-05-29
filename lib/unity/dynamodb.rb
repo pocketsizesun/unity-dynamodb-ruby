@@ -11,7 +11,12 @@ require_relative "dynamodb/version"
 require_relative "dynamodb/error"
 require_relative "dynamodb/attribute_serializer"
 require_relative "dynamodb/attribute_deserializer"
-require_relative "dynamodb/stream_event_parser"
+
+# DynamoDB Streams Utilities
+require_relative "dynamodb/stream_event"
+require_relative "dynamodb/stream_processor"
+
+# DynamoDB Class Types
 require_relative "dynamodb/number_set"
 require_relative "dynamodb/string_set"
 

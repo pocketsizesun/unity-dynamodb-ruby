@@ -4,16 +4,12 @@ module Unity
   module DynamoDB
     class AttributeDeserializer
       def self.call(hash)
-        new.call(hash)
-      end
-
-      def call(hash)
         return unless hash.is_a?(Hash)
 
         hash.transform_values { |v| translate(v) }
       end
 
-      def translate(arg)
+      def self.translate(arg)
         type = arg.keys[0]
         value = arg[type]
         case type
