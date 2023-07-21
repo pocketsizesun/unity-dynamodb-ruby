@@ -15,15 +15,15 @@ module Unity
 
       def self.from_json(json)
         obj = new
-        obj.event_id = hash['eventID'] # event_id
-        obj.event_name = hash['eventName'] # event_name
-        obj.event_version = hash['eventVersion'] # event_version
-        obj.event_source = hash['eventSource'] # event_source
-        obj.event_source_arn = hash['eventSourceARN'] # event_source_arn
-        obj.aws_region = hash['awsRegion'] # aws_region
-        obj.dynamodb = Record.from_json(hash['dynamodb'])
-        obj.user_identity = hash['userIdentity'] # user_identity
-        obj.table_name = hash['eventSourceARN']&.split('/', 3)&.at(1) # table_name
+        obj.event_id = json['eventID'] # event_id
+        obj.event_name = json['eventName'] # event_name
+        obj.event_version = json['eventVersion'] # event_version
+        obj.event_source = json['eventSource'] # event_source
+        obj.event_source_arn = json['eventSourceARN'] # event_source_arn
+        obj.aws_region = json['awsRegion'] # aws_region
+        obj.dynamodb = Record.from_json(json['dynamodb'])
+        obj.user_identity = json['userIdentity'] # user_identity
+        obj.table_name = json['eventSourceARN']&.split('/', 3)&.at(1) # table_name
         obj
       end
 
@@ -38,19 +38,19 @@ module Unity
 
         def self.from_json(json)
           obj = new
-          obj.approximate_creation_date_time = hash['dynamodb']['ApproximateCreationDateTime']
+          obj.approximate_creation_date_time = json['dynamodb']['ApproximateCreationDateTime']
           obj.keys = Unity::DynamoDB::AttributeDeserializer.call(
-            hash['dynamodb']['Keys']
+            json['dynamodb']['Keys']
           )
           obj.new_image = Unity::DynamoDB::AttributeDeserializer.call(
-            hash['dynamodb']['NewImage']
+            json['dynamodb']['NewImage']
           )
           obj.old_image = Unity::DynamoDB::AttributeDeserializer.call(
-            hash['dynamodb']['OldImage']
+            json['dynamodb']['OldImage']
           )
-          obj.sequence_number = hash['dynamodb']['SequenceNumber']
-          obj.size_bytes = hash['dynamodb']['SizeBytes']
-          obj.stream_view_type = hash['dynamodb']['StreamViewType']
+          obj.sequence_number = json['dynamodb']['SequenceNumber']
+          obj.size_bytes = json['dynamodb']['SizeBytes']
+          obj.stream_view_type = json['dynamodb']['StreamViewType']
           obj
         end
       end
