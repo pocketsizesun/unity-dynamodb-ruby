@@ -38,19 +38,19 @@ module Unity
 
         def self.from_json(json)
           obj = new
-          obj.approximate_creation_date_time = json['dynamodb']['ApproximateCreationDateTime']
+          obj.approximate_creation_date_time = json['ApproximateCreationDateTime']
           obj.keys = Unity::DynamoDB::AttributeDeserializer.call(
-            json['dynamodb']['Keys']
+            json['Keys']
           )
           obj.new_image = Unity::DynamoDB::AttributeDeserializer.call(
-            json['dynamodb']['NewImage']
+            json['NewImage']
           )
           obj.old_image = Unity::DynamoDB::AttributeDeserializer.call(
-            json['dynamodb']['OldImage']
+            json['OldImage']
           )
-          obj.sequence_number = json['dynamodb']['SequenceNumber']
-          obj.size_bytes = json['dynamodb']['SizeBytes']
-          obj.stream_view_type = json['dynamodb']['StreamViewType']
+          obj.sequence_number = json['SequenceNumber']
+          obj.size_bytes = json['SizeBytes']
+          obj.stream_view_type = json['StreamViewType']
           obj
         end
       end
